@@ -38,6 +38,7 @@ class tomcat::params {
       'Debian' => $::lsbdistcodename ? {
         /lenny|squeeze|wheezy/ => '6',
         'precise'         => '6',
+        'raring'          => '6',
       },
       'RedHat' => $::operatingsystemrelease ? {
         /^5.*/ => '5.5',
