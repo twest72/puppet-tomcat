@@ -1,6 +1,7 @@
 class tomcat::params {
 
-  $default_source_release = '6.0.26'
+  $default_source_release = '7.0.41'
+  $default_source_release_v6 = '6.0.26'
   $default_source_release_v55 = '5.5.27'
 
   $instance_basedir = $tomcat_instance_basedir ? {
@@ -17,17 +18,21 @@ class tomcat::params {
   if defined(Class['Tomcat::source']) {
     $type = 'source'
     if ( ! $tomcat_version ) {
-      $maj_version = '6'
+      $maj_version = '7'
       $version = $default_source_release
     } else {
       $version = $tomcat_version
-      if versioncmp($tomcat_version, '6.0.0') >= 0 {
-        $maj_version = '6'
+      if versioncmp($tomcat_version, '7.0.0') >= 0 {
+        $maj_version = '7'
       } else {
-        if versioncmp($tomcat_version, '5.5.0') >= 0 {
-          $maj_version = '5.5'
+        if versioncmp($tomcat_version, '6.0.0') >= 0 {
+          $maj_version = '6'
         } else {
-          fail 'only versions >= 5.5 or >= 6.0 are supported !'
+          if versioncmp($tomcat_version, '5.5.0') >= 0 {
+            $maj_version = '5.5'
+          } else {
+            fail 'only versions >= 5.5 or >= 6.0 are supported !'
+          }
         }
       }
     }
@@ -37,8 +42,8 @@ class tomcat::params {
     $maj_version = $::osfamily ? {
       'Debian' => $::lsbdistcodename ? {
         /lenny|squeeze|wheezy/ => '6',
-        'precise'         => '6',
-        'raring'          => '6',
+        'precise'         => '7',
+        'raring'          => '7',
       },
       'RedHat' => $::operatingsystemrelease ? {
         /^5.*/ => '5.5',
@@ -49,7 +54,8 @@ class tomcat::params {
     # it would be better to set the distribution tomcat-version!
     $version = $maj_version ? {
       '5.5' => $default_source_release_v55,
-      '6'   => $default_source_release,
+      '6'   => $default_source_release_v6,
+      '7'   => $default_source_release,
     }
 
   }
@@ -57,5 +63,4 @@ class tomcat::params {
   if $tomcat_debug {
     notify{"type=${type},maj_version=${maj_version},version=${version}":}
   }
-
 }

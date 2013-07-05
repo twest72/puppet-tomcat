@@ -118,8 +118,11 @@ define tomcat::instance(
 
   include tomcat::params
 
-  $tomcat_name = $name
+  $tomcat_name = 'tomcat7'
   $basedir = "${tomcat::params::instance_basedir}/${name}"
+
+  info "tomcat_name: ${tomcat_name}"
+  info "basedir: ${basedir}"
 
   if $owner == 'tomcat' {
     $dirmode  = $webapp_mode ? {
@@ -201,6 +204,8 @@ define tomcat::instance(
     $classpath = '/usr/share/tomcat6/bin/tomcat-juli.jar'
   }
 
+  info "tomcat major version: ${tomcat::params::maj_version}"
+
   # default server.xml is slightly different between tomcat5.5 and tomcat6
   if $tomcat::params::maj_version == '5.5' {
     $serverdotxml = 'server.xml.tomcat55.erb'
@@ -209,6 +214,11 @@ define tomcat::instance(
   if $tomcat::params::maj_version == '6' {
     $serverdotxml = 'server.xml.tomcat6.erb'
   }
+
+  if $tomcat::params::maj_version == '7' {
+    $serverdotxml = 'server.xml.tomcat7.erb'
+  }
+  info "server xml file: ${serverdotxml}"
 
   if $tomcat::params::maj_version == '5.5' and $tomcat::params::type == 'package' {
     $catalinahome = $::osfamily ? {
@@ -221,6 +231,13 @@ define tomcat::instance(
     $catalinahome = $::osfamily ? {
       RedHat => '/usr/share/tomcat6',
       Debian => '/usr/share/tomcat6',
+    }
+  }
+  
+  if $tomcat::params::maj_version == '7' and $tomcat::params::type == 'package' {
+    $catalinahome = $::osfamily ? {
+      RedHat => '/usr/share/tomcat7',
+      Debian => '/usr/share/tomcat7',
     }
   }
 
@@ -436,6 +453,7 @@ define tomcat::instance(
 
 
   # Init and env scripts
+  info "Create init script: /etc/init.d/tomcat-${name}"
   file {"/etc/init.d/tomcat-${name}":
     ensure  => $present,
     content => template('tomcat/tomcat.init.erb'),
@@ -457,7 +475,7 @@ define tomcat::instance(
   }
 
   if $tomcat::params::type == 'package' {
-    $servicerequire = Package['tomcat']
+    $servicerequire = Package[$tomcat_name]
   } else {
     $servicerequire = File['/opt/apache-tomcat']
   }

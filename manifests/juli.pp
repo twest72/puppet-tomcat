@@ -16,11 +16,13 @@ class tomcat::juli {
 
   include tomcat::params
 
+  $tomcat_home = "/usr/share/tomcat7"
+
   if ( ! $tomcat_home ) {
     err('undefined mandatory attribute: $tomcat_home')
   }
 
-  $baseurl = "${tomcat::params::mirror}/tomcat-6/v${tomcat::params::version}/bin"
+  $baseurl = "${tomcat::params::mirror}/tomcat-7/v${tomcat::params::version}"
 
   file { "${tomcat_home}/extras/":
     ensure  => directory,
@@ -28,19 +30,19 @@ class tomcat::juli {
   }
 
   archive::download { "tomcat-juli.jar":
-    url         => "${baseurl}/extras/tomcat-juli.jar",
-    digest_url  => "${baseurl}/extras/tomcat-juli.jar.md5",
+    url         => "${baseurl}/bin/extras/tomcat-juli.jar",
+    digest_url  => "${baseurl}/bin/extras/tomcat-juli.jar.md5",
     digest_type => "md5",
-    src_target  => "${tomcat_home}/extras/",
-    require     => File["${tomcat_home}/extras/"],
+    src_target  => "${tomcat_home}/extras",
+    require     => File["${tomcat_home}/extras"],
   }
 
   archive::download { "tomcat-juli-adapters.jar":
-    url         => "${baseurl}/extras/tomcat-juli-adapters.jar",
-    digest_url  => "${baseurl}/extras/tomcat-juli-adapters.jar.md5",
+    url         => "${baseurl}/bin/extras/tomcat-juli-adapters.jar",
+    digest_url  => "${baseurl}/bin/extras/tomcat-juli-adapters.jar.md5",
     digest_type => "md5",
-    src_target  => "${tomcat_home}/extras/",
-    require     => File["${tomcat_home}/extras/"],
+    src_target  => "${tomcat_home}/extras",
+    require     => File["${tomcat_home}/extras"],
   }
 
   file { "${tomcat_home}/bin/tomcat-juli.jar":
